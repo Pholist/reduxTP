@@ -1,56 +1,79 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Link,
+  Switch,
+  Route,
+  Redirect,
+  useLocation,
+} from "react-router-dom";
+import { useEffect, useDispatch, useSelector } from "./lib/imported";
+import LeaguesList from "./components/Leagues/List";
+import Details from "./components/Leagues/Details";
+import TeamsList from "./components/Teams/List";
+import TeamDetails from "./components/Teams/Details";
+import SelectorList from "./components/VideoGames/SelectorList";
+import { getGames } from "./js/GamesSlice";
 
 function App() {
+  const { games, loading } = useSelector((state) => state.games);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getGames());
+  }, []);
+  if (loading) return <p>Loading...</p>;
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
+    <div>
+      <Router>
+        <div>
+          <nav className="navbar navbar-expand-lg navbar-light bg-light">
+            <ul className="navbar-nav mr-auto">
+              <li>
+                <Link to="/" className="nav-link">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link to="/leagues" className="nav-link">
+                  List Leagues
+                </Link>
+              </li>
+              <li>
+                <Link to="/teams" className="nav-link">
+                  List Teams
+                </Link>
+              </li>
+              <li>
+                <SelectorList games={games} />
+              </li>
+            </ul>
+          </nav>
+          <hr />
+          <Switch>
+            <Route exact path="/">
+              <Redirect to="/leagues" />
+            </Route>
+            <Route exact path="/Leagues" component={LeaguesList} />
+            <Route path="/Leagues/:leagueId" component={Details} />
+            <Route exact path="/Teams" component={TeamsList} />
+            <Route path="/Teams/:teamId" component={TeamDetails} />
+            <Route component={NoMatch} />
+          </Switch>
+        </div>
+      </Router>
+    </div>
+  );
+}
+
+function NoMatch() {
+  let location = useLocation();
+
+  return (
+    <div>
+      <h3>
+        No match for <code>{location.pathname}</code>
+      </h3>
     </div>
   );
 }
